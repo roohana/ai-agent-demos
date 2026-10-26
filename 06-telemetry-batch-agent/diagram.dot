@@ -1,0 +1,30 @@
+digraph G {
+  rankdir=TB; labelloc=t; label="Telemetry Batch Agent: SRE and monitoring AI for D365 FSCM"; fontsize=18; fontname="DejaVu Sans"; pad=0.4; nodesep=0.5; ranksep=0.6; splines=true; bgcolor="white";
+  node [fontname="DejaVu Sans", fontsize=11, margin="0.18,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=9, arrowsize=0.8];
+  fscm [label="D365 Finance & Supply Chain\nbatch jobs, performance", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  ai [label="Azure Application Insights /\nLog Analytics\nfailures, durations, exceptions", shape=box, style="rounded,filled", fillcolor="#EBE4F7", color="#6B4BB0", fontcolor="#1B1F24"];
+  kql [label="KQL tool\n(approved query templates,\nread-only)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  llm [label="Azure OpenAI analysis layer\nsummarise, find patterns,\nrecommend actions", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  agent [label="Copilot interface\n\"Why did batch jobs fail last night?\"", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  ops [label="Operations / SRE team", shape=box, style="rounded,filled", fillcolor="#F2F4F7", color="#667085", fontcolor="#1B1F24"];
+  mon [label="Azure Monitor alerts\nfailure rate, p95 duration,\nrepeated failures", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  teams [label="Teams channel\nincident notes", shape=box, style="rounded,filled", fillcolor="#E3F4DF", color="#3C8A2E", fontcolor="#1B1F24"];
+  gate [label="Confirmation gate\nre-run only if transient,\nmax 2 per 24h", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  rerun [label="Batch job re-run", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  cost [label="Cost view\nlong-running / resource-heavy jobs", shape=box, style="rounded,filled", fillcolor="#EBE4F7", color="#6B4BB0", fontcolor="#1B1F24"];
+  fscm -> ai [style=solid, color="#475467", label="telemetry"];
+  ai -> mon [style=dashed, color="#475467", label="rules"];
+  mon -> teams [style=solid, color="#475467", label="alert"];
+  ops -> agent [style=solid, color="#475467", label="question"];
+  agent -> kql [style=solid, color="#475467", label="tool call"];
+  kql -> ai [style=solid, color="#475467", label="query"];
+  ai -> llm [style=dashed, color="#475467", label="results"];
+  llm -> agent [style=solid, color="#475467", label="summary, impact,\nlikely cause, action"];
+  agent -> ops [style=solid, color="#475467", label="answer"];
+  agent -> gate [style=solid, color="#475467", label="re-run proposal"];
+  gate -> rerun [style=solid, color="#475467", label="after yes"];
+  rerun -> fscm [style=dashed, color="#475467"];
+  llm -> cost [style=dotted, color="#475467"];
+  legend [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3"><TR><TD BGCOLOR="#F2F4F7" BORDER="1" COLOR="#667085" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">User / channel</FONT></TD></TR><TR><TD BGCOLOR="#DCEBFA" BORDER="1" COLOR="#215E99" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AI agent / model</FONT></TD></TR><TR><TD BGCOLOR="#DDF3EE" BORDER="1" COLOR="#1B7F6B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Integration layer</FONT></TD></TR><TR><TD BGCOLOR="#FDEBD9" BORDER="1" COLOR="#C2611B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">System of record</FONT></TD></TR><TR><TD BGCOLOR="#EBE4F7" BORDER="1" COLOR="#6B4BB0" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Data / telemetry</FONT></TD></TR><TR><TD BGCOLOR="#FDE7E7" BORDER="1" COLOR="#B42318" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Control / guardrail</FONT></TD></TR><TR><TD BGCOLOR="#E3F4DF" BORDER="1" COLOR="#3C8A2E" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Human step</FONT></TD></TR></TABLE>>];
+}

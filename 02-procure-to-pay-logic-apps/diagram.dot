@@ -1,0 +1,35 @@
+digraph G {
+  rankdir=TB; labelloc=t; label="Procure-to-Pay approval: Copilot agent + Azure Logic Apps"; fontsize=18; fontname="DejaVu Sans"; pad=0.4; nodesep=0.5; ranksep=0.6; splines=true; bgcolor="white";
+  node [fontname="DejaVu Sans", fontsize=11, margin="0.18,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=9, arrowsize=0.8];
+  emp [label="Employee\n\"I need to buy 10 monitors\"", shape=box, style="rounded,filled", fillcolor="#F2F4F7", color="#667085", fontcolor="#1B1F24"];
+  agent [label="Copilot Studio agent\n(agent.md)", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  trig [label="HTTP trigger\n{requisitionId}", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  get [label="Get requisition + vendor\n(HTTP, retry x3)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  dec [label="Needs approval?", shape=diamond, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  auto [label="Auto-approved\n(<= 1,000)", shape=box, style="rounded,filled", fillcolor="#E3F4DF", color="#3C8A2E", fontcolor="#1B1F24"];
+  appr [label="Approval email\n(Outlook, wait for response)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  mgr [label="Line manager (<= 10,000)\nor Finance (> 10,000)", shape=box, style="rounded,filled", fillcolor="#E3F4DF", color="#3C8A2E", fontcolor="#1B1F24"];
+  write [label="Write decision to ERP\n(HTTP POST, retry x3)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  note [label="Notify requester\n(Outlook mail)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  erp [label="D365 F&O\npurchase requisitions", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  err [label="Failure scope\nResponse 500 + runId", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  ai [label="Application Insights /\nLog Analytics\nrun diagnostics", shape=box, style="rounded,filled", fillcolor="#EBE4F7", color="#6B4BB0", fontcolor="#1B1F24"];
+  emp -> agent [style=solid, color="#475467"];
+  agent -> erp [style=solid, color="#475467", label="create requisition\n(custom connector)"];
+  agent -> trig [style=solid, color="#475467", label="start workflow"];
+  trig -> get [style=solid, color="#475467"];
+  get -> erp [style=dashed, color="#475467", label="read"];
+  get -> dec [style=solid, color="#475467"];
+  dec -> auto [style=solid, color="#475467", label="no"];
+  dec -> appr [style=solid, color="#475467", label="yes"];
+  appr -> mgr [style=solid, color="#475467"];
+  mgr -> write [style=solid, color="#475467", label="Approve / Reject"];
+  write -> erp [style=dashed, color="#475467", label="update status"];
+  auto -> note [style=solid, color="#475467"];
+  write -> note [style=solid, color="#475467"];
+  get -> err [style=dotted, color="#B42318", label="on failure"];
+  err -> ai [style=dotted, color="#B42318"];
+  note -> ai [style=dotted, color="#475467", label="run history"];
+  legend [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3"><TR><TD BGCOLOR="#F2F4F7" BORDER="1" COLOR="#667085" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">User / channel</FONT></TD></TR><TR><TD BGCOLOR="#DCEBFA" BORDER="1" COLOR="#215E99" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AI agent / model</FONT></TD></TR><TR><TD BGCOLOR="#DDF3EE" BORDER="1" COLOR="#1B7F6B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Integration layer</FONT></TD></TR><TR><TD BGCOLOR="#FDEBD9" BORDER="1" COLOR="#C2611B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">System of record</FONT></TD></TR><TR><TD BGCOLOR="#EBE4F7" BORDER="1" COLOR="#6B4BB0" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Data / telemetry</FONT></TD></TR><TR><TD BGCOLOR="#FDE7E7" BORDER="1" COLOR="#B42318" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Control / guardrail</FONT></TD></TR><TR><TD BGCOLOR="#E3F4DF" BORDER="1" COLOR="#3C8A2E" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Human step</FONT></TD></TR></TABLE>>];
+}

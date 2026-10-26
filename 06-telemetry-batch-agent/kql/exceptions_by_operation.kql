@@ -1,0 +1,6 @@
+// ILLUSTRATIVE: exceptions linked to an operation id, to connect a failed job to its root exception.
+exceptions
+| where timestamp > ago(24h)
+| summarize count = count(), sample = any(outerMessage), lastSeen = max(timestamp) by type, operation_Name
+| order by count desc
+| take 20

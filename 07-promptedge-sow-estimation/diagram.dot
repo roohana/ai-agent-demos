@@ -1,0 +1,31 @@
+digraph G {
+  rankdir=TB; labelloc=t; label="PromptEdge: AI SOW and estimation tool for D365 F&O implementations"; fontsize=18; fontname="DejaVu Sans"; pad=0.4; nodesep=0.5; ranksep=0.6; splines=true; bgcolor="white";
+  node [fontname="DejaVu Sans", fontsize=11, margin="0.18,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=9, arrowsize=0.8];
+  ui [label="Multi-step wizard UI\nmodules, processes, data migration,\nintegrations, AI workload,\ntemplate + example upload", shape=box, style="rounded,filled", fillcolor="#F2F4F7", color="#667085", fontcolor="#1B1F24"];
+  hist [label="Historical project data\n(actuals by workstream)", shape=box, style="rounded,filled", fillcolor="#EBE4F7", color="#6B4BB0", fontcolor="#1B1F24"];
+  est [label="Estimation agent\nrange per workstream +\ntimeline + risks", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  json [label="Estimate JSON\n(validated against schema)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  rev1 [label="Consultant review\nopen questions resolved", shape=box, style="rounded,filled", fillcolor="#E3F4DF", color="#3C8A2E", fontcolor="#1B1F24"];
+  kb [label="Templates, example content,\ncompany knowledge base", shape=box, style="rounded,filled", fillcolor="#EBE4F7", color="#6B4BB0", fontcolor="#1B1F24"];
+  sow [label="SOW / proposal writer agent\n(grounded; new text marked [REVIEW])", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  llm [label="Azure OpenAI", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  doc [label="Document generation\nSOW (Word)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  ppt [label="PowerPoint automation\nproposal deck", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  rev2 [label="Legal / commercial review", shape=box, style="rounded,filled", fillcolor="#E3F4DF", color="#3C8A2E", fontcolor="#1B1F24"];
+  out [label="Export", shape=box, style="rounded,filled", fillcolor="#F2F4F7", color="#667085", fontcolor="#1B1F24"];
+  ui -> est [style=solid, color="#475467", label="scope inputs"];
+  hist -> est [style=solid, color="#475467", label="similar projects"];
+  est -> json [style=solid, color="#475467"];
+  json -> rev1 [style=solid, color="#475467"];
+  rev1 -> sow [style=solid, color="#475467", label="approved estimate"];
+  kb -> sow [style=solid, color="#475467", label="grounding"];
+  sow -> llm [style=dashed, color="#475467"];
+  sow -> doc [style=solid, color="#475467"];
+  sow -> ppt [style=solid, color="#475467"];
+  doc -> rev2 [style=solid, color="#475467"];
+  ppt -> rev2 [style=solid, color="#475467"];
+  rev2 -> out [style=solid, color="#475467"];
+  ui -> kb [style=dotted, color="#475467", label="uploads"];
+  legend [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3"><TR><TD BGCOLOR="#F2F4F7" BORDER="1" COLOR="#667085" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">User / channel</FONT></TD></TR><TR><TD BGCOLOR="#DCEBFA" BORDER="1" COLOR="#215E99" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AI agent / model</FONT></TD></TR><TR><TD BGCOLOR="#DDF3EE" BORDER="1" COLOR="#1B7F6B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Integration layer</FONT></TD></TR><TR><TD BGCOLOR="#EBE4F7" BORDER="1" COLOR="#6B4BB0" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Data / telemetry</FONT></TD></TR><TR><TD BGCOLOR="#E3F4DF" BORDER="1" COLOR="#3C8A2E" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Human step</FONT></TD></TR></TABLE>>];
+}

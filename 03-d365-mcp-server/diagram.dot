@@ -1,0 +1,34 @@
+digraph G {
+  rankdir=TB; labelloc=t; label="D365 MCP server: governed read / write / ops tools"; fontsize=18; fontname="DejaVu Sans"; pad=0.4; nodesep=0.5; ranksep=0.6; splines=true; bgcolor="white";
+  node [fontname="DejaVu Sans", fontsize=11, margin="0.18,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=9, arrowsize=0.8];
+  a1 [label="Copilot Studio agent", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  a2 [label="LangChain / LangGraph agent", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  a3 [label="Claude Desktop / other MCP client", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  scope [label="Scope filter\nMCP_SCOPES = read,write,ops\n(tool not granted = not listed)", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  val [label="Input validation\n(id formats, ranges, enums)", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  read [label="Read tools (8)\nsearch_customers, get_customer_overview,\nlist_invoices, list_items, search_vendors,\nlist_purchase_orders, get_requisition_status,\nlist_batch_jobs", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  write [label="Write tools (4)\ncreate_sales_order, create_purchase_requisition,\ncreate_opportunity, update_opportunity", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  ops [label="Ops tools (2)\nrerun_batch_job,\ntrigger_approval_workflow", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  conf [label="Two-step confirmation\npreview + token -> human yes\n-> confirm=true", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  audit [label="Audit log\nevery call (JSON lines,\nsecrets masked)", shape=box, style="rounded,filled", fillcolor="#EBE4F7", color="#6B4BB0", fontcolor="#1B1F24"];
+  cli [label="D365 client (httpx)\nerrors -> readable messages", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  api [label="D365 CRM + ERP API\n(mock here; real D365 via\nDataverse Web API / OData)", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  la [label="Logic App\napproval workflow", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  a1 -> scope [style=solid, color="#475467", label="MCP (stdio /\nstreamable HTTP)"];
+  a2 -> scope [style=solid, color="#475467"];
+  a3 -> scope [style=solid, color="#475467"];
+  scope -> val [style=solid, color="#475467"];
+  val -> read [style=solid, color="#475467"];
+  val -> write [style=solid, color="#475467"];
+  val -> ops [style=solid, color="#475467"];
+  write -> conf [style=solid, color="#475467"];
+  ops -> conf [style=solid, color="#475467"];
+  conf -> cli [style=solid, color="#475467", label="only after confirm"];
+  read -> cli [style=solid, color="#475467"];
+  cli -> api [style=solid, color="#475467"];
+  conf -> la [style=dashed, color="#475467", label="HTTP trigger"];
+  read -> audit [style=dotted, color="#475467"];
+  conf -> audit [style=dotted, color="#475467"];
+  legend [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3"><TR><TD BGCOLOR="#DCEBFA" BORDER="1" COLOR="#215E99" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AI agent / model</FONT></TD></TR><TR><TD BGCOLOR="#DDF3EE" BORDER="1" COLOR="#1B7F6B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Integration layer</FONT></TD></TR><TR><TD BGCOLOR="#FDEBD9" BORDER="1" COLOR="#C2611B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">System of record</FONT></TD></TR><TR><TD BGCOLOR="#EBE4F7" BORDER="1" COLOR="#6B4BB0" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Data / telemetry</FONT></TD></TR><TR><TD BGCOLOR="#FDE7E7" BORDER="1" COLOR="#B42318" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Control / guardrail</FONT></TD></TR></TABLE>>];
+}

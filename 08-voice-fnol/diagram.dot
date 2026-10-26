@@ -1,0 +1,28 @@
+digraph G {
+  rankdir=TB; labelloc=t; label="AI Voice FNOL: first notice of loss voice assistant"; fontsize=18; fontname="DejaVu Sans"; pad=0.4; nodesep=0.5; ranksep=0.6; splines=true; bgcolor="white";
+  node [fontname="DejaVu Sans", fontsize=11, margin="0.18,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=9, arrowsize=0.8];
+  caller [label="Caller", shape=box, style="rounded,filled", fillcolor="#F2F4F7", color="#667085", fontcolor="#1B1F24"];
+  tel [label="Telephony / voice client", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  stt [label="Azure Speech\nspeech-to-text", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  agent [label="LLM agent (Azure OpenAI)\nagent.md: spoken style,\nverify -> collect -> confirm -> create", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  kb [label="Custom knowledge base\nservice times, process, FAQs", shape=box, style="rounded,filled", fillcolor="#EBE4F7", color="#6B4BB0", fontcolor="#1B1F24"];
+  tts [label="Azure Speech\ntext-to-speech", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  fn [label="Azure Functions\nget_policy, create_claim,\nget_claim_status", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  claims [label="Claims / policy system", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  id [label="Identity verification\npolicy no. + 2 checks", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  human [label="Human agent handoff\ninjury, failed ID, caller request", shape=box, style="rounded,filled", fillcolor="#E3F4DF", color="#3C8A2E", fontcolor="#1B1F24"];
+  caller -> tel [style=solid, color="#475467", label="voice"];
+  tel -> stt [style=solid, color="#475467"];
+  stt -> agent [style=solid, color="#475467", label="transcript"];
+  agent -> kb [style=dashed, color="#475467", label="retrieve"];
+  agent -> id [style=solid, color="#475467"];
+  id -> fn [style=solid, color="#475467", label="verified"];
+  agent -> fn [style=solid, color="#475467", label="tool calls"];
+  fn -> claims [style=solid, color="#475467"];
+  agent -> tts [style=solid, color="#475467", label="reply text"];
+  tts -> tel [style=solid, color="#475467"];
+  tel -> caller [style=solid, color="#475467", label="voice"];
+  agent -> human [style=dotted, color="#B42318", label="escalate"];
+  legend [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3"><TR><TD BGCOLOR="#F2F4F7" BORDER="1" COLOR="#667085" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">User / channel</FONT></TD></TR><TR><TD BGCOLOR="#DCEBFA" BORDER="1" COLOR="#215E99" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AI agent / model</FONT></TD></TR><TR><TD BGCOLOR="#DDF3EE" BORDER="1" COLOR="#1B7F6B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Integration layer</FONT></TD></TR><TR><TD BGCOLOR="#FDEBD9" BORDER="1" COLOR="#C2611B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">System of record</FONT></TD></TR><TR><TD BGCOLOR="#EBE4F7" BORDER="1" COLOR="#6B4BB0" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Data / telemetry</FONT></TD></TR><TR><TD BGCOLOR="#FDE7E7" BORDER="1" COLOR="#B42318" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Control / guardrail</FONT></TD></TR><TR><TD BGCOLOR="#E3F4DF" BORDER="1" COLOR="#3C8A2E" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Human step</FONT></TD></TR></TABLE>>];
+}

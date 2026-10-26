@@ -1,0 +1,128 @@
+{
+  "$comment": "Azure Logic Apps (Consumption) code-view definition. Paste into Logic App > Logs view > Code view. Re-authorize the office365 connection after import. Not deployed-tested in this repo: use simulate_workflow.py to see the same logic run locally.",
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "$connections": {"defaultValue": {}, "type": "Object"},
+      "erpBaseUrl": {"defaultValue": "https://YOUR-API-HOST.example.com", "type": "String"},
+      "erpApiKey": {"defaultValue": "", "type": "SecureString"}
+    },
+    "triggers": {
+      "When_an_agent_calls_the_workflow": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "required": ["requisitionId"],
+            "properties": {"requisitionId": {"type": "string", "pattern": "^PR-\\d+$"}}
+          }
+        }
+      }
+    },
+    "actions": {
+      "Main": {
+        "type": "Scope",
+        "actions": {
+          "Get_requisition": {
+            "type": "Http",
+            "inputs": {
+              "method": "GET",
+              "uri": "@{parameters('erpBaseUrl')}/erp/purchase-requisitions/@{triggerBody()?['requisitionId']}",
+              "headers": {"x-api-key": "@parameters('erpApiKey')"}
+            },
+            "runtimeConfiguration": {"secureData": {"properties": ["inputs"]}},
+            "retryPolicy": {"type": "exponential", "count": 3, "interval": "PT10S"}
+          },
+          "Needs_approval": {
+            "type": "If",
+            "runAfter": {"Get_requisition": ["Succeeded"]},
+            "expression": {"and": [{"equals": ["@body('Get_requisition')?['status']", "PendingApproval"]}]},
+            "actions": {
+              "Choose_approver": {
+                "type": "Compose",
+                "inputs": "@if(equals(body('Get_requisition')?['approvalRoute'], 'FinanceApproval'), 'finance.approvers@example.com', 'line.manager@example.com')"
+              },
+              "Send_approval_email": {
+                "type": "ApiConnectionWebhook",
+                "runAfter": {"Choose_approver": ["Succeeded"]},
+                "inputs": {
+                  "host": {"connection": {"name": "@parameters('$connections')['office365']['connectionId']"}},
+                  "path": "/approvalmail/$subscriptions",
+                  "body": {
+                    "NotificationUrl": "@{listCallbackUrl()}",
+                    "Message": {
+                      "To": "@outputs('Choose_approver')",
+                      "Subject": "Approve requisition @{body('Get_requisition')?['requisitionId']} (@{body('Get_requisition')?['amount']})",
+                      "Options": "Approve, Reject",
+                      "Body": "Requester: @{body('Get_requisition')?['requesterEmail']}\nVendor: @{body('Get_requisition')?['vendorId']}\nDescription: @{body('Get_requisition')?['description']}\nRoute: @{body('Get_requisition')?['approvalRoute']}",
+                      "HideHTMLMessage": false,
+                      "ShowHTMLConfirmationDialog": false,
+                      "Importance": "Normal"
+                    }
+                  }
+                }
+              },
+              "Write_decision_to_ERP": {
+                "type": "Http",
+                "runAfter": {"Send_approval_email": ["Succeeded"]},
+                "inputs": {
+                  "method": "POST",
+                  "uri": "@{parameters('erpBaseUrl')}/erp/purchase-requisitions/@{triggerBody()?['requisitionId']}/decision",
+                  "headers": {"x-api-key": "@parameters('erpApiKey')", "Content-Type": "application/json"},
+                  "body": {
+                    "decision": "@if(equals(body('Send_approval_email')?['SelectedOption'], 'Approve'), 'Approved', 'Rejected')",
+                    "approver": "@outputs('Choose_approver')",
+                    "comment": "Decision recorded by Logic App run @{workflow().run.name}"
+                  }
+                },
+                "runtimeConfiguration": {"secureData": {"properties": ["inputs"]}},
+                "retryPolicy": {"type": "exponential", "count": 3, "interval": "PT10S"}
+              }
+            },
+            "else": {"actions": {}}
+          },
+          "Notify_requester": {
+            "type": "ApiConnection",
+            "runAfter": {"Needs_approval": ["Succeeded"]},
+            "inputs": {
+              "host": {"connection": {"name": "@parameters('$connections')['office365']['connectionId']"}},
+              "method": "post",
+              "path": "/v2/Mail",
+              "body": {
+                "To": "@body('Get_requisition')?['requesterEmail']",
+                "Subject": "Requisition @{body('Get_requisition')?['requisitionId']} processed",
+                "Body": "<p>Your requisition for @{body('Get_requisition')?['description']} has been processed.</p>"
+              }
+            }
+          }
+        }
+      },
+      "Respond_success": {
+        "type": "Response",
+        "runAfter": {"Main": ["Succeeded"]},
+        "kind": "Http",
+        "inputs": {"statusCode": 200, "body": {"requisitionId": "@triggerBody()?['requisitionId']", "runId": "@workflow().run.name", "result": "processed"}}
+      },
+      "Respond_failure": {
+        "type": "Response",
+        "runAfter": {"Main": ["Failed", "TimedOut"]},
+        "kind": "Http",
+        "inputs": {"statusCode": 500, "body": {"requisitionId": "@triggerBody()?['requisitionId']", "runId": "@workflow().run.name", "result": "failed", "hint": "Check the Logic App run history with this runId"}}
+      }
+    },
+    "outputs": {}
+  },
+  "parameters": {
+    "$connections": {
+      "value": {
+        "office365": {
+          "connectionId": "/subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.Web/connections/office365",
+          "connectionName": "office365",
+          "id": "/subscriptions/<SUB>/providers/Microsoft.Web/locations/<REGION>/managedApis/office365"
+        }
+      }
+    }
+  }
+}

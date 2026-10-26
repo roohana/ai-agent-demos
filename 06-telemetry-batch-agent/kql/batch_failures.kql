@@ -1,0 +1,9 @@
+// ILLUSTRATIVE: adjust table and customDimensions names to your environment's telemetry schema.
+// Batch job failures in the last 24 hours, grouped by job.
+traces
+| where timestamp > ago(24h)
+| where tostring(customDimensions.eventId) startswith "BatchJob" or message has "Batch"
+| where severityLevel >= 3 or message has_any ("failed", "error", "exception")
+| extend job = tostring(customDimensions.batchJobName), jobId = tostring(customDimensions.batchJobId)
+| summarize failures = count(), firstSeen = min(timestamp), lastSeen = max(timestamp), sample = any(message) by job, jobId
+| order by failures desc

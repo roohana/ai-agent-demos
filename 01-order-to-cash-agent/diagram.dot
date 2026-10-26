@@ -1,0 +1,30 @@
+digraph G {
+  rankdir=TB; labelloc=t; label="Order-to-Cash Assistant: CRM + ERP agent flow"; fontsize=18; fontname="DejaVu Sans"; pad=0.4; nodesep=0.5; ranksep=0.6; splines=true; bgcolor="white";
+  node [fontname="DejaVu Sans", fontsize=11, margin="0.18,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=9, arrowsize=0.8];
+  user [label="Sales / finance user\nTeams or web chat", shape=box, style="rounded,filled", fillcolor="#F2F4F7", color="#667085", fontcolor="#1B1F24"];
+  auth [label="Entra ID sign-in\nacts with user permissions (RBAC)", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  agent [label="Copilot Studio agent\n(agent.md instructions,\ngenerative orchestration)", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  gate [label="Confirmation gate\nsummary -> user says yes", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  crmc [label="Built-in CRM connector\n(Dataverse / D365 Sales)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  erpc [label="Built-in ERP connector\n(Finance & Operations)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  cust [label="Custom connector\n(OpenAPI: stock + credit-checked\nsales orders)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  crm [label="D365 CRM\naccounts, opportunities", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  erp [label="D365 F&O\ninvoices, items, sales orders", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  api [label="Custom ERP service endpoint", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  llm [label="Azure OpenAI", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  user -> auth [style=solid, color="#475467"];
+  auth -> agent [style=solid, color="#475467", label="request"];
+  agent -> llm [style=dashed, color="#475467", label="plan + answer"];
+  agent -> crmc [style=solid, color="#475467", label="read: accounts,\nopportunities"];
+  agent -> erpc [style=solid, color="#475467", label="read: invoices"];
+  agent -> cust [style=solid, color="#475467", label="read: stock"];
+  agent -> gate [style=solid, color="#475467", label="write intent"];
+  gate -> crmc [style=solid, color="#475467", label="create / update\nopportunity"];
+  gate -> cust [style=solid, color="#475467", label="create sales order"];
+  crmc -> crm [style=solid, color="#475467"];
+  erpc -> erp [style=solid, color="#475467"];
+  cust -> api [style=solid, color="#475467"];
+  api -> erp [style=solid, color="#475467", label="stock + credit rules"];
+  legend [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3"><TR><TD BGCOLOR="#F2F4F7" BORDER="1" COLOR="#667085" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">User / channel</FONT></TD></TR><TR><TD BGCOLOR="#DCEBFA" BORDER="1" COLOR="#215E99" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AI agent / model</FONT></TD></TR><TR><TD BGCOLOR="#DDF3EE" BORDER="1" COLOR="#1B7F6B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Integration layer</FONT></TD></TR><TR><TD BGCOLOR="#FDEBD9" BORDER="1" COLOR="#C2611B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">System of record</FONT></TD></TR><TR><TD BGCOLOR="#FDE7E7" BORDER="1" COLOR="#B42318" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Control / guardrail</FONT></TD></TR></TABLE>>];
+}

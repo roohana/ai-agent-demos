@@ -1,0 +1,7 @@
+// ILLUSTRATIVE: p50 / p95 duration per job over 7 days, to spot long-running or degrading jobs.
+customMetrics
+| where timestamp > ago(7d)
+| where name == "BatchJobDurationMinutes"
+| extend job = tostring(customDimensions.batchJobName)
+| summarize p50 = percentile(value, 50), p95 = percentile(value, 95), runs = count() by job, bin(timestamp, 1d)
+| order by job asc, timestamp asc

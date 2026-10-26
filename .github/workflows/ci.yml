@@ -1,0 +1,13 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r shared/mock-d365-api/requirements.txt -r 03-d365-mcp-server/requirements.txt -r 09-secure-gpt/requirements.txt
+      - run: cd 03-d365-mcp-server && pytest -q
+      - run: cd 09-secure-gpt && pytest -q
+      - run: cd 10-ai-cost-optimization && python cost_report.py --generate && python cost_report.py

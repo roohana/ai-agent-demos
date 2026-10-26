@@ -1,0 +1,169 @@
+swagger: '2.0'
+info:
+  title: D365 CRM & ERP Demo Connector
+  description: Custom connector for actions the built-in D365 connectors do not cover in this demo (credit-checked sales orders, requisition routing). Point host at your API.
+  version: '1.0'
+host: YOUR-API-HOST.example.com
+basePath: /
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: x-api-key
+security:
+  - api_key: []
+paths:
+  /erp/invoices:
+    get:
+      operationId: ListInvoices
+      summary: List invoices
+      description: Returns invoices, optionally filtered by account and status.
+      parameters:
+        - name: accountId
+          in: query
+          required: false
+          type: string
+          x-ms-summary: Account ID
+        - name: status
+          in: query
+          required: false
+          type: string
+          enum: [Open, Paid]
+          x-ms-summary: Status
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Invoice'
+  /erp/items:
+    get:
+      operationId: ListItems
+      summary: List items and stock
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Item'
+  /erp/sales-orders:
+    post:
+      operationId: CreateSalesOrder
+      summary: Create a sales order
+      description: Creates a sales order after checking stock and credit limit. Returns 409 with a readable reason when a rule fails.
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SalesOrderRequest'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/SalesOrder'
+        '409':
+          description: Business rule failed (stock or credit)
+          schema:
+            $ref: '#/definitions/Problem'
+  /erp/purchase-requisitions:
+    post:
+      operationId: CreatePurchaseRequisition
+      summary: Create a purchase requisition
+      description: Creates a requisition and returns the approval route (AutoApproved, ManagerApproval, FinanceApproval).
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/RequisitionRequest'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Requisition'
+        '409':
+          description: Vendor blocked
+          schema:
+            $ref: '#/definitions/Problem'
+  /erp/purchase-requisitions/{requisitionId}:
+    get:
+      operationId: GetRequisition
+      summary: Get requisition status
+      parameters:
+        - name: requisitionId
+          in: path
+          required: true
+          type: string
+          x-ms-summary: Requisition ID
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Requisition'
+definitions:
+  Invoice:
+    type: object
+    properties:
+      invoiceId: {type: string, x-ms-summary: Invoice ID}
+      accountId: {type: string, x-ms-summary: Account ID}
+      amount: {type: number, x-ms-summary: Amount}
+      dueDate: {type: string, x-ms-summary: Due date}
+      status: {type: string, x-ms-summary: Status}
+  Item:
+    type: object
+    properties:
+      itemId: {type: string, x-ms-summary: Item ID}
+      name: {type: string, x-ms-summary: Name}
+      unitPrice: {type: number, x-ms-summary: Unit price}
+      onHand: {type: integer, x-ms-summary: On hand}
+  OrderLine:
+    type: object
+    required: [itemId, quantity]
+    properties:
+      itemId: {type: string, x-ms-summary: Item ID}
+      quantity: {type: integer, x-ms-summary: Quantity}
+  SalesOrderRequest:
+    type: object
+    required: [accountId, lines]
+    properties:
+      accountId: {type: string, x-ms-summary: Account ID}
+      lines:
+        type: array
+        items:
+          $ref: '#/definitions/OrderLine'
+  SalesOrder:
+    type: object
+    properties:
+      salesOrderId: {type: string, x-ms-summary: Sales order ID}
+      accountId: {type: string, x-ms-summary: Account ID}
+      status: {type: string, x-ms-summary: Status}
+      total: {type: number, x-ms-summary: Total}
+  RequisitionRequest:
+    type: object
+    required: [requesterEmail, vendorId, description, amount]
+    properties:
+      requesterEmail: {type: string, x-ms-summary: Requester email}
+      vendorId: {type: string, x-ms-summary: Vendor ID}
+      description: {type: string, x-ms-summary: Description}
+      amount: {type: number, x-ms-summary: Amount}
+      costCenter: {type: string, x-ms-summary: Cost center}
+  Requisition:
+    type: object
+    properties:
+      requisitionId: {type: string, x-ms-summary: Requisition ID}
+      status: {type: string, x-ms-summary: Status}
+      approvalRoute: {type: string, x-ms-summary: Approval route}
+      amount: {type: number, x-ms-summary: Amount}
+  Problem:
+    type: object
+    properties:
+      detail: {type: string, x-ms-summary: Reason}

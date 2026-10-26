@@ -1,0 +1,26 @@
+digraph G {
+  rankdir=TB; labelloc=t; label="Finance & Operations Insights Copilot"; fontsize=18; fontname="DejaVu Sans"; pad=0.4; nodesep=0.5; ranksep=0.6; splines=true; bgcolor="white";
+  node [fontname="DejaVu Sans", fontsize=11, margin="0.18,0.10"];
+  edge [fontname="DejaVu Sans", fontsize=9, arrowsize=0.8];
+  user [label="Finance / AP / procurement user", shape=box, style="rounded,filled", fillcolor="#F2F4F7", color="#667085", fontcolor="#1B1F24"];
+  agent [label="Copilot agent\n(agent.md)", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  llm [label="Azure OpenAI\nquery planning + explanation", shape=box, style="rounded,filled", fillcolor="#DCEBFA", color="#215E99", fontcolor="#1B1F24"];
+  tools [label="Tool layer\ncustom connector / API\n(OData, tool-calling)", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  sec [label="Security roles (RBAC)\nlegal entity + period scoping", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  fo [label="D365 Finance & Operations\nGL, AP, AR, procurement", shape=box, style="rounded,filled", fillcolor="#FDEBD9", color="#C2611B", fontcolor="#1B1F24"];
+  read [label="Read: balances, open items,\nvendor spend, transaction\nexplanations", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  gate [label="Write requests\nsummary -> user yes", shape=box, style="rounded,filled", fillcolor="#FDE7E7", color="#B42318", fontcolor="#1B1F24"];
+  act [label="Actions: vendor invoice processing,\npurchase requisition,\nreport generation,\nperiod-end checklist", shape=box, style="rounded,filled", fillcolor="#DDF3EE", color="#1B7F6B", fontcolor="#1B1F24"];
+  user -> agent [style=solid, color="#475467", label="natural language"];
+  agent -> llm [style=dashed, color="#475467"];
+  agent -> sec [style=solid, color="#475467"];
+  sec -> tools [style=solid, color="#475467"];
+  tools -> read [style=solid, color="#475467"];
+  read -> fo [style=solid, color="#475467", label="query"];
+  agent -> gate [style=solid, color="#475467", label="write intent"];
+  gate -> act [style=solid, color="#475467", label="confirmed"];
+  act -> fo [style=solid, color="#475467", label="create / trigger"];
+  fo -> agent [style=dashed, color="#475467", label="results"];
+  agent -> user [style=solid, color="#475467", label="answer + basis\n(entity, period)"];
+  legend [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3"><TR><TD BGCOLOR="#F2F4F7" BORDER="1" COLOR="#667085" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">User / channel</FONT></TD></TR><TR><TD BGCOLOR="#DCEBFA" BORDER="1" COLOR="#215E99" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AI agent / model</FONT></TD></TR><TR><TD BGCOLOR="#DDF3EE" BORDER="1" COLOR="#1B7F6B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Integration layer</FONT></TD></TR><TR><TD BGCOLOR="#FDEBD9" BORDER="1" COLOR="#C2611B" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">System of record</FONT></TD></TR><TR><TD BGCOLOR="#FDE7E7" BORDER="1" COLOR="#B42318" WIDTH="14" HEIGHT="14"></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Control / guardrail</FONT></TD></TR></TABLE>>];
+}

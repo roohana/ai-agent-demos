@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PromptEdge estimate",
+  "type": "object",
+  "required": ["workstreams", "timeline", "confidence", "open_questions"],
+  "properties": {
+    "workstreams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "effort_days", "assumptions", "risks"],
+        "properties": {
+          "name": {"enum": ["Discovery", "Design", "Configuration", "Data migration", "Integrations", "Extensions", "Reports", "AI workload", "Testing", "Training", "Go-live and hypercare", "Project management"]},
+          "effort_days": {
+            "type": "object",
+            "required": ["low", "expected", "high"],
+            "properties": {"low": {"type": "number", "minimum": 0}, "expected": {"type": "number", "minimum": 0}, "high": {"type": "number", "minimum": 0}}
+          },
+          "assumptions": {"type": "array", "items": {"type": "string"}},
+          "risks": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "required": ["weeks_expected", "critical_path"],
+      "properties": {"weeks_low": {"type": "number"}, "weeks_expected": {"type": "number"}, "weeks_high": {"type": "number"}, "critical_path": {"type": "array", "items": {"type": "string"}}}
+    },
+    "similar_projects_used": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"enum": ["low", "medium", "high"]},
+    "open_questions": {"type": "array", "items": {"type": "string"}}
+  }
+}
